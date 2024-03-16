@@ -1,7 +1,7 @@
 # PokrivalaNet – backend part
 
 ## Introduction
-This repository contains a backend part with [Express.js](https://expressjs.com/en/4x/api.html) of Pokrivala.net application. 
+This repository contains a backend part with [Express.js](https://expressjs.com/en/4x/api.html) of Pokrivala.net application using the needed CRUD operations of the project. 
 It is intended to demonstrate as wide an array of features, libraries, etc. as possible while still keeping the app simple and easy to understand.
  
  This application consists of Backend components (controllers, routes and utils directories) that uses Express to manage some of functionalities of the project.
