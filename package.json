@@ -8,18 +8,21 @@
     "path": false
   },
   "private": true,
-  "proxy": "http://localhost:8080",
+  "proxy": "http://127.0.0.1:8080",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "compression": "^1.7.4",
+    "cookie": "^0.6.0",
     "cookie-parser": "^1.4.6",
+    "cookie-signature": "^1.2.1",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
     "mysql2": "^3.6.3",
@@ -28,7 +31,8 @@
     "request": "^2.88.2",
     "s3-client": "^4.4.2",
     "web-vitals": "^2.1.4",
-    "xss-clean": "^0.1.4"
+    "xss-clean": "^0.1.4",
+    "zlib": "^1.0.5"
   },
   "scripts": {
     "start-server": "nodemon server.js",

@@ -7,11 +7,19 @@ const xss = require('xss-clean');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const dns = require('dns');
 const AppError = require('./utils/appError');
+const authRouter = require('./routes/authRoutes');
+const userRouter = require('./routes/userRoutes');
 const truckRouter = require('./routes/truckRoutes');
 const windproofCurtainsRouter = require('./routes/windproofCurtainsRouter');
 const contactRouter = require('./routes/contactRoutes');
-const globalErrorHandler = require('./controllers/errorControlller');
+const globalErrorHandler = require('./controllers/errorController');
+const { verifyToken } = require('./controllers/authController');
+
+// Set default result order for DNS resolution
+dns.setDefaultResultOrder('ipv4first');
+// require("http").get("http://127.0.0.1:8080/", res => console.log('res.statusCode', res));
 
 const app = express();
 
@@ -46,7 +54,7 @@ app.use('/', limiter);
 
 //Set Cors
 const corsOptions = {
-  origin: '*',
+  origin: process.env.NODE_ENV === 'production' ? process.env.REACT_APP_PRODUCTION_URL : process.env.REACT_APP_DEVELOPMENT_URL,
   credentials: true,
   optionSuccessStatus: 201,
 };
@@ -78,6 +86,8 @@ app.use((req, res, next) => {
 });
 
 // GLOBAL ROTUES
+app.use('/api/auth', authRouter);
+app.use('/api/users', verifyToken, userRouter);
 app.use('/api/trucks', truckRouter);
 app.use('/api/windproofcurtains', windproofCurtainsRouter);
 app.use('/api', contactRouter);

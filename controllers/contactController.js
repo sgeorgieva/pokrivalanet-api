@@ -1,13 +1,12 @@
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const sendEmail = require('./../utils/emailContact');
-const pool = require('../utils/pool');
+const pool = require('../utils/pool2');
 
 exports.contact = catchAsync(async (req, res, next) => {
   const { name, email, subject, message } = req.body;
   const content = `Name: ${name}\nEmail: ${email} \n\n Message: ${message} `;
-  console.log('req', req.body);
-
+  
   try {
     sendEmail({
       from: email,

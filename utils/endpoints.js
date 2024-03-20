@@ -8,7 +8,13 @@ const endpoints = {
   windproofComparedFilesUrl: '/windproofcurtains-offer-file-edit',
   windproofSendEmailUrl: '/windproofcurtains-offer-email',
   verifyTokenUrl: '/verify-token',
-  contactUrl: '/contact'
+  contactUrl: '/contact',
+  register: '/register',
+  login: '/login',
+  logout: '/logout',
+  user: '/:userId',
+  userId:'/:id',
+  users: '/'
 };
 
 module.exports = endpoints;
