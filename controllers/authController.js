@@ -4,6 +4,7 @@ const cookie = require('cookie');
 const zlib = require('zlib');
 const { hashSync, genSaltSync, compareSync } = require("bcrypt");
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('../utils/appError');
 const pool2 = require('../utils/pool2');
 
 exports.register = catchAsync(async (req, res, next) => {
@@ -12,10 +13,7 @@ exports.register = catchAsync(async (req, res, next) => {
     let password = req.body.password;
 
     if (!userName || !password) {
-      res.status(400).json({
-        success: false,
-        statusText: 'Invalid username or password'
-      });
+      return next(new AppError('Invalid username or password'), 400);
     }
 
     const salt = genSaltSync(10);
@@ -33,10 +31,7 @@ exports.register = catchAsync(async (req, res, next) => {
       isAuthenticated: false
     });
   } catch(error) {
-    res.status(400).json({
-      success: false,
-      statusText: error
-    });
+    return next(new AppError(error), 400);
   }
 
   next();
@@ -49,10 +44,7 @@ exports.login = catchAsync(async (req, res, next) => {
     user = await pool2.getUserByUsername(userName);
 
     if (!user) {
-      res.status(401).json({
-        success: false,
-        statusText: "Invalid username or password"
-      });
+      return next(new AppError('Invalid username or password'), 401);
     }
 
     const isValidPassword = compareSync(password, user[0][0].password);
@@ -87,21 +79,15 @@ exports.login = catchAsync(async (req, res, next) => {
                 token: cookieString
               });
         } else {
-          // console.log(err);
-          return;
+          // console.log('err', err);
+          return next(new AppError(err), 400);
         }
       })} else {
-        res.status(401).json({
-          success: false,
-          statusText: "Invalid username or password"
-        });
+        return next(new AppError("Invalid username or password"), 401);        
       }
-    } catch(error){
-      // console.log('error: ' + error);
-      res.status(400).json({
-        success: false,
-        statusText: error
-      });
+    } catch(error) {
+      console.log('error: ' + error);
+      return next(new AppError(error), 400);
     }
 });
 
@@ -112,19 +98,13 @@ exports.verifyToken = catchAsync(async(req, res, next) => {
   // console.log('token', token);
   
   if (!token) {
-    return res.send({
-      "code": 403,
-      "status": "Access Denied! Unauthorized User"
-    });
+    return next(new AppError('Access Denied! Unauthorized User'), 403);
   }
   
   try {
     const data = jwt.verify(token, process.env.SECRET_KEY, (err, authData) => {
       if (err) {
-        return res.send({
-          "code": 403,
-          "status": "Invalid Token..."
-        });
+        return next(new AppError('Invalid Token...'), 403);
       } else {
         // console.log('authData.user.role', authData.user.role);
         const role = authData.user.role;
@@ -132,15 +112,12 @@ exports.verifyToken = catchAsync(async(req, res, next) => {
         if (role === "admin") {
           next();
         } else {
-          return res.send({
-            "code": 401,
-            "status": "AAccess Denied! You are not an Admin"
-          });
+          return next(new AppError('Access Denied! You are not an Admin'), 401);
         }
       }
     })
-  } catch {
-    return res.sendStatus(403);
+  } catch (err) {
+    return next(new AppError('err'), 403);
   }
 });
 
