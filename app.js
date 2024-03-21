@@ -12,6 +12,7 @@ const AppError = require('./utils/appError');
 const authRouter = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
 const truckRouter = require('./routes/truckRoutes');
+const priceRouter = require('./routes/priceRoutes');
 const windproofCurtainsRouter = require('./routes/windproofCurtainsRouter');
 const contactRouter = require('./routes/contactRoutes');
 const globalErrorHandler = require('./controllers/errorController');
@@ -62,11 +63,11 @@ const corsOptions = {
 // enable CORS using npm package
 app.use(cors(corsOptions));
 
-// parse application/json
-app.use(bodyParser.json());
-
 // Require body-parser (to receive post data from clients)
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// parse application/json
+app.use(bodyParser.json());
 
 if (process.env.NODE_ENV === 'production') {
   // Serve any static files
@@ -89,6 +90,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRouter);
 app.use('/api/users', verifyToken, userRouter);
 app.use('/api/trucks', truckRouter);
+app.use('/api/price', priceRouter);
 app.use('/api/windproofcurtains', windproofCurtainsRouter);
 app.use('/api', contactRouter);
 

@@ -1,6 +1,6 @@
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const pool = require('../utils/pool');
+const pool = require('../utils/pool2');
 const sendEmail = require('../utils/emailOffer');
 
 exports.windproofCurtainsPriceOffer = catchAsync(async (req, res, next) => {
