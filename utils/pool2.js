@@ -100,9 +100,17 @@ pool2.allTruckGondolaPrices = async () => {
     throw err;
   }
 };
-pool2.allTruckShutterPrices = async () => {
+pool2.allTruckWithShutterPrices = async () => {
   try {
-    var results = await pool.query("SELECT * FROM truck_shutter_prices");
+    var results = await pool.query("SELECT * FROM truck_with_shutters_price");
+    return results[0];
+  } catch (err) {
+    throw err;
+  }
+};
+pool2.allTruckWithoutShutterPrices = async () => {
+  try {
+    var results = await pool.query("SELECT * FROM truck_without_shutters_price");
     return results[0];
   } catch (err) {
     throw err;
@@ -110,8 +118,6 @@ pool2.allTruckShutterPrices = async () => {
 };
 
 pool2.editTruckCoversPrices = async (data) => {
-  console.log("data", data);
-
   try {
     const results = await pool.query(
       `UPDATE truck_covers_prices 
@@ -146,6 +152,85 @@ pool2.editTruckCoversPrices = async (data) => {
     throw err;
   }
 };
+pool2.editTruckGondolaPrices = async (data) => {
+  try {
+    const results = await pool.query(
+      `UPDATE truck_gondola_prices 
+        SET longitudinal_pocket_price = ?, 
+        fitting_price = ?, 
+        assembly_price = ?, 
+        tarpaulin_price_1 = ?, 
+        tarpaulin_price_2 = ?
+      WHERE id = ?`,
+      [
+        data.longitudinal_pocket_price,
+        data.fitting_price,
+        data.assembly_price,
+        data.tarpaulin_price_1,
+        data.tarpaulin_price_2,
+        data.id
+      ],
+      function (error, results, fields) {
+        if (error) {
+          throw err;
+        }
+      }
+    );
+
+    if (results[0].affectedRows >= 1) {
+      const results = await pool.query(`SELECT * FROM truck_gondola_prices`);
+      return results[0];
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
+pool2.editTruckWithShutterPrices = async (data) => { 
+  try {
+    const results = await pool.query(
+      `UPDATE truck_with_shutters_price 
+        SET with_shutter_price =?
+      WHERE id =?`,
+      [data.with_shutter_price, data.id],
+      function (error, results, fields) {
+        if (error) {
+          throw err;
+        }
+      }
+    );
+
+    if (results[0].affectedRows >= 1) {
+      const results = await pool.query(`SELECT * FROM truck_with_shutters_price`);
+      return results[0];
+    }
+  } catch(err) {
+    throw err;
+  }
+};
+pool2.editTruckWithoutShutterPrices = async (data) => { 
+  try {
+    const results = await pool.query(
+      `UPDATE truck_without_shutters_price 
+        SET without_shutters_price =?
+      WHERE id =?`,
+      [data.without_shutters_price, data.id],
+      function (error, results, fields) {
+        if (error) {
+          throw err;
+        }
+      }
+    );
+
+    if (results[0].affectedRows >= 1) {
+      const results = await pool.query(`SELECT * FROM truck_without_shutters_price`);
+      return results[0];
+    }
+  } catch(err) {
+    throw err;
+  }
+};
+
 pool2.allWindProofCurtainsPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM windproof_curtains_prices");

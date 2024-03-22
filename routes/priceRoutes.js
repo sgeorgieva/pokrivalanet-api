@@ -8,9 +8,11 @@ const router = express.Router();
 router.get(`${endpoints.truckCoversPricesUrl}`, truckPricesController.truckCoversPrice);
 router.put(`${endpoints.truckCoversEditPricesUrl}`, truckPricesController.truckCoversEditPrice);
 router.get(`${endpoints.truckGondolaPricesUrl}`, truckPricesController.truckGondolaPrices);
-// router.put(`${endpoints.truckShutterPriceUrl}`, truckController.truckShutterPriceOffer);
-router.get(`${endpoints.truckShutterPricesUrl}`, truckPricesController.truckShutterPrices);
-// router.put(`${endpoints.windProofEditPricesUrl}`, truckController.truckOfferFile);
+router.put(`${endpoints.truckGondolaEditPricesUrl}`, truckPricesController.truckGondolaEditPrice);
+router.get(`${endpoints.truckWithShutterPriceUrl}`, truckPricesController.truckWithShutterPrice);
+router.put(`${endpoints.truckWithShutterEditPriceUrl}`, truckPricesController.truckWithShutterEditPrice);
+router.get(`${endpoints.truckWithoutShutterPriceUrl}`, truckPricesController.truckWithoutShutterPrice);
+router.put(`${endpoints.truckWithoutShutterEditPriceUrl}`, truckPricesController.truckWithoutShutterEditPrice);
 router.get(`${endpoints.windproofPricesUrl}`, windproofPricesController.windproofCurtainPrices);
 router.put(`${endpoints.windProofEditPricesUrl}`, windproofPricesController.windproofCurtainsEditPrice);
 
