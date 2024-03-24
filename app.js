@@ -8,6 +8,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const dns = require('dns');
+const dotenv = require("dotenv");
 const AppError = require('./utils/appError');
 const authRouter = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -17,6 +18,8 @@ const windproofCurtainsRouter = require('./routes/windproofCurtainsRouter');
 const contactRouter = require('./routes/contactRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const { verifyToken } = require('./controllers/authController');
+
+dotenv.config({ path: "./config.env" });
 
 // Set default result order for DNS resolution
 dns.setDefaultResultOrder('ipv4first');
