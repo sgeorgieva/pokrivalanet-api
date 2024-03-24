@@ -1,5 +1,6 @@
 const mysql = require("mysql2");
 const dotenv = require("dotenv");
+
 dotenv.config({ path: "./config.env" });
 
 var pool = mysql
@@ -13,10 +14,9 @@ var pool = mysql
   })
   .promise();
 
-// ***Requests to the User table ***
-let pool2 = {};
+let sql = {};
 
-pool2.allUser = () => {
+sql.allUser = () => {
   return new Promise((resolve, reject) => {
     pool.query("SELECT * FROM users ", (error, users) => {
       if (error) {
@@ -28,7 +28,7 @@ pool2.allUser = () => {
   });
 };
 
-pool2.getUserByUsername = async (userName) => {
+sql.getUserByUsername = async (userName) => {
   return await pool.query(
     "SELECT * FROM users WHERE username = ?",
     [userName],
@@ -42,7 +42,7 @@ pool2.getUserByUsername = async (userName) => {
   );
 };
 
-pool2.insertUser = (userName, password) => {
+sql.insertUser = (userName, password) => {
   pool.query(
     "INSERT INTO users (username, password) VALUES (?,  ?)",
     [userName, password],
@@ -56,7 +56,7 @@ pool2.insertUser = (userName, password) => {
   );
 };
 
-pool2.updateUser = (userName, role, password, id) => {
+sql.updateUser = (userName, role, password, id) => {
   return new Promise((resolve, reject) => {
     pool.query(
       "UPDATE users SET username = ?, role= ?, password=? WHERE id = ?",
@@ -72,7 +72,7 @@ pool2.updateUser = (userName, role, password, id) => {
   });
 };
 
-pool2.deleteUser = (id) => {
+sql.deleteUser = (id) => {
   return new Promise((resolve, reject) => {
     pool.query("DELETE FROM users WHERE id = ?", [id], (error) => {
       if (error) {
@@ -84,7 +84,7 @@ pool2.deleteUser = (id) => {
   });
 };
 
-pool2.allTruckCoversPrices = async () => {
+sql.allTruckCoversPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM truck_covers_prices");
     return results[0];
@@ -92,7 +92,7 @@ pool2.allTruckCoversPrices = async () => {
     throw err;
   }
 };
-pool2.allTruckGondolaPrices = async () => {
+sql.allTruckGondolaPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM truck_gondola_prices");
     return results[0];
@@ -100,7 +100,7 @@ pool2.allTruckGondolaPrices = async () => {
     throw err;
   }
 };
-pool2.allTruckWithShutterPrices = async () => {
+sql.allTruckWithShutterPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM truck_with_shutters_price");
     return results[0];
@@ -108,7 +108,7 @@ pool2.allTruckWithShutterPrices = async () => {
     throw err;
   }
 };
-pool2.allTruckWithoutShutterPrices = async () => {
+sql.allTruckWithoutShutterPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM truck_without_shutters_price");
     return results[0];
@@ -117,7 +117,7 @@ pool2.allTruckWithoutShutterPrices = async () => {
   }
 };
 
-pool2.editTruckCoversPrices = async (data) => {
+sql.editTruckCoversPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE truck_covers_prices 
@@ -152,7 +152,7 @@ pool2.editTruckCoversPrices = async (data) => {
     throw err;
   }
 };
-pool2.editTruckGondolaPrices = async (data) => {
+sql.editTruckGondolaPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE truck_gondola_prices 
@@ -186,7 +186,7 @@ pool2.editTruckGondolaPrices = async (data) => {
   }
 };
 
-pool2.editTruckWithShutterPrices = async (data) => { 
+sql.editTruckWithShutterPrices = async (data) => { 
   try {
     const results = await pool.query(
       `UPDATE truck_with_shutters_price 
@@ -208,7 +208,7 @@ pool2.editTruckWithShutterPrices = async (data) => {
     throw err;
   }
 };
-pool2.editTruckWithoutShutterPrices = async (data) => { 
+sql.editTruckWithoutShutterPrices = async (data) => { 
   try {
     const results = await pool.query(
       `UPDATE truck_without_shutters_price 
@@ -231,7 +231,7 @@ pool2.editTruckWithoutShutterPrices = async (data) => {
   }
 };
 
-pool2.allWindProofCurtainsPrices = async () => {
+sql.allWindProofCurtainsPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM windproof_curtains_prices");
     return results[0];
@@ -239,7 +239,7 @@ pool2.allWindProofCurtainsPrices = async () => {
     throw err;
   }
 };
-pool2.editWindproofCurtainsPrices = async (data) => {
+sql.editWindproofCurtainsPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE windproof_curtains_prices 
@@ -276,4 +276,77 @@ pool2.editWindproofCurtainsPrices = async (data) => {
   }
 };
 
-module.exports = pool2;
+sql.windproofCurtainsOfferSaveFile = async (data) => {
+  try {
+    const results = await pool.query(
+      `INSERT INTO windproof_curtains SET ?`, [data],
+      function (error, results, fields) {
+        if (error) {
+          throw err;
+        }
+      }
+    );
+    return results[0].insertId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+sql.windproofCurtainsOfferEditFile = async (data) => {
+  try {
+    const results = await pool.query(
+      `UPDATE windproof_curtains SET filename = ?, type = ?, size = ? WHERE id=?`, 
+      [data.filename, data.type, data.size, data.id],
+      function (error, results, fields) {
+        if (error) {
+          throw err;
+        }
+      }
+    );
+
+    if (results[0].affectedRows >= 1) {
+      return results;
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
+sql.truckOfferSaveFile = async (data) => {
+  try {
+    const results = await pool.query(
+      `INSERT INTO truck_covers SET ?`, [data],
+      function (error, results, fields) {
+        if (error) {
+          throw err;
+        }
+      }
+    );
+
+    return results[0].insertId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+sql.truckOfferEditFile = async (data) => {
+  try {
+    const results = await pool.query(
+      `UPDATE truck_covers SET filename = ?, type = ?, size = ? WHERE id=?`, 
+      [data.filename, data.type, data.size, data.id],
+      function (error, results, fields) {
+        if (error) {
+          throw err;
+        }
+      }
+    );
+
+    if (results[0].affectedRows >= 1) { 
+      return results;
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
+module.exports = sql;
