@@ -1,13 +1,13 @@
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const pool2 = require("../utils/pool2");
+const sql = require("../utils/sql");
 const iterateEntries = require("../utils/iterateEntries");
 
 exports.truckCoversPrice = catchAsync(async (req, res, next) => {
   try {
-    const prices = await pool2.allTruckCoversPrices();
+    const prices = await sql.allTruckCoversPrices();
     const modifiedPrices = iterateEntries(prices[0], (price) => {
-      return price.toLocaleString("en-US");
+      return price.toLocaleString("en-US", { minimumFractionDigits: 2 });
     });
 
     return res.status(200).json({
@@ -22,9 +22,9 @@ exports.truckCoversPrice = catchAsync(async (req, res, next) => {
 
 exports.truckGondolaPrices = catchAsync(async (req, res, next) => {
   try {
-    const prices = await pool2.allTruckGondolaPrices();
+    const prices = await sql.allTruckGondolaPrices();
     const modifiedPrices = iterateEntries(prices[0], (price) => {
-      return price.toLocaleString("en-US");
+      return price.toLocaleString("en-US", { minimumFractionDigits: 2 });
     });
 
     return res.status(200).json({
@@ -39,9 +39,9 @@ exports.truckGondolaPrices = catchAsync(async (req, res, next) => {
 
 exports.truckWithShutterPrice = catchAsync(async (req, res, next) => {
   try {
-    const prices = await pool2.allTruckWithShutterPrices();
+    const prices = await sql.allTruckWithShutterPrices();
     const modifiedPrices = iterateEntries(prices[0], (price) => {
-      return price.toLocaleString("en-US");
+      return price.toLocaleString("en-US", { minimumFractionDigits: 2 });
     });
 
     return res.status(200).json({
@@ -56,9 +56,9 @@ exports.truckWithShutterPrice = catchAsync(async (req, res, next) => {
 
 exports.truckWithoutShutterPrice = catchAsync(async (req, res, next) => {
   try {
-    const prices = await pool2.allTruckWithoutShutterPrices();
+    const prices = await sql.allTruckWithoutShutterPrices();
     const modifiedPrices = iterateEntries(prices[0], (price) => {
-      return price.toLocaleString("en-US");
+      return price.toLocaleString("en-US", { minimumFractionDigits: 2 });
     });
 
     return res.status(200).json({
@@ -87,8 +87,8 @@ exports.truckCoversEditPrice = catchAsync(async (req, res, next) => {
       return next(new AppError("Missing required parameters"), 400);
     }
 
-    await pool2.editTruckCoversPrices(newData);
-    const results = await pool2.allTruckCoversPrices();
+    await sql.editTruckCoversPrices(newData);
+    const results = await sql.allTruckCoversPrices();
 
     return res.status(200).json({
       success: true,
@@ -116,8 +116,8 @@ exports.truckGondolaEditPrice = catchAsync(async (req, res, next) => {
       return next(new AppError("Missing required parameters"), 400);
     }
 
-    await pool2.editTruckGondolaPrices(newData);
-    const results = await pool2.allTruckGondolaPrices();
+    await sql.editTruckGondolaPrices(newData);
+    const results = await sql.allTruckGondolaPrices();
 
     return res.status(200).json({
       success: true,
@@ -133,8 +133,7 @@ exports.truckGondolaEditPrice = catchAsync(async (req, res, next) => {
 exports.truckWithShutterEditPrice = catchAsync(async (req, res, next) => { 
   try {
     const newData = req.body;
-    console.log('newData', newData);
-
+    
     if (
       !newData.id ||
       !newData.with_shutter_price
@@ -142,21 +141,21 @@ exports.truckWithShutterEditPrice = catchAsync(async (req, res, next) => {
       return next(new AppError("Missing required parameters"), 400);
     }
 
-    await pool2.editTruckWithShutterPrices(newData);
-    const results = await pool2.allTruckWithShutterPrices();
+    await sql.editTruckWithShutterPrices(newData);
+    const results = await sql.allTruckWithShutterPrices();
 
     return res.status(200).json({
       success: true,
       status: "success",
       message: "Truck with shutter price edited sucessfully!",
-      result: results,
+      result: results[0],
     });
   } catch (error) {
     return next(new AppError(error), 500);
   }
 });
 
-exports.truckWithoutShutterEditPrice = catchAsync(async (req, res, next) => { 
+exports.truckWithoutShutterEditPrice = catchAsync(async (req, res, next) => {
   try {
     const newData = req.body;
 
@@ -167,8 +166,8 @@ exports.truckWithoutShutterEditPrice = catchAsync(async (req, res, next) => {
       return next(new AppError("Missing required parameters"), 400);
     }
 
-    await pool2.editTruckWithoutShutterPrices(newData);
-    const results = await pool2.allTruckWithoutShutterPrices();
+    await sql.editTruckWithoutShutterPrices(newData);
+    const results = await sql.allTruckWithoutShutterPrices();
 
     return res.status(200).json({
       success: true,
