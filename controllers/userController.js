@@ -1,16 +1,13 @@
 const { hashSync, genSaltSync } = require("bcrypt");
-const pool = require("../utils/pool2");
+const sql = require("../utils/sql");
 
 exports.getUserId = catchAsync('userId', async (req, res, next, userId) => { 
   try {
-    const user = await pool.getOne("User", userId);
+    const user = await sql.getOne("User", userId);
     req.user = user;
     next();
   } catch(error) {
-    return res.send({
-      "code": 404,
-      "status": error
-    });
+    return next(new AppError(error), 404);
   }
 });
 
@@ -27,25 +24,19 @@ exports.createUser = catchAsync(async (req, res, next) => {
     let password = req.body.user.password;
 
     if (!userName || !password) {
-      return res.send({
-        "code": 404,
-        "status": error
-      });
+      return next(new AppError("Wrong username or password"), 404);
     }
 
     const salt = genSaltSync(10);
     password = hashSync(password, salt);
 
-    const user = await pool.insertUser(userName, password);
+    const user = await sql.insertUser(userName, password);
     return res.send({
       "code": 201,
       "status": json({user: user})
     });
   } catch(error) {
-    return res.send({
-      "code": 400,
-      "status": error
-    });
+    return next(new AppError(error), 400);
   }
 });
 
@@ -57,13 +48,13 @@ exports.updateUser = (async (req, res, next) => {
     const userId = req.params.id;
 
     if (!userName || !role || !password) {
-      return res.sendStatus(400);
+      return next(new AppError("Wrong username or password"), 400);
     }
 
     const salt = genSaltSync(10);
     password = hashSync(password, salt);
 
-    const user =  await pool.updateUser(userName, role, password, userId);
+    const user =  await sql.updateUser(userName, role, password, userId);
     return res.send({
       "code": 200,
       "status": "User updated successfully"
@@ -79,30 +70,24 @@ exports.updateUser = (async (req, res, next) => {
 exports.deleteUser = (async (req, res, next) => {
   try {
     const userId = req.params.id
-    const user =  await pool.deleteUser(userId);
+    const user = await sql.deleteUser(userId);
     return res.send({
       "code": 204,
       "status": "User deleted successfully"
     });
   } catch(error) {
-    return res.send({
-      "code": 400,
-      "status": error
-    });
+    return next(new AppError(error), 400);
   }
 });
 
 exports.getAllUsers = (async (req, res, next) => {
   try {
-    const users = await pool.allUser();
+    const users = await sql.allUser();
     return res.send({
       "code": 200,
       "status": json({users: users})
     });
   } catch(error) {
-    return res.send({
-      "code": 400,
-      "status": error
-    });
+    return next(new AppError(error), 400);
   }
 });
