@@ -349,4 +349,23 @@ sql.truckOfferEditFile = async (data) => {
   }
 };
 
+sql.contactSaveMessage = async (data) => {
+  try {
+    const results = await pool.query(
+      `INSERT INTO contacts SET ?`, [data],
+      function (error, results, fields) {
+        if (error) {
+          throw err;
+        }
+      }
+    );
+
+    if (results[0].affectedRows >= 1) { 
+      return 'success';
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
 module.exports = sql;

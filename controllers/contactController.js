@@ -1,7 +1,7 @@
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const sendEmail = require('./../utils/emailContact');
-const pool = require('../utils/pool2');
+const sql = require('../utils/sql');
 
 exports.contact = catchAsync(async (req, res, next) => {
   const { name, email, subject, message } = req.body;
@@ -18,24 +18,32 @@ exports.contact = catchAsync(async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       message:
-        'Thanks for your messege!\n Soon some of our team will respond you.'
+        "Thanks for your messege!\n Soon some of our team will respond you."
     });
   } catch (err) {
     return next(
-      new AppError('There was an error sending the email. Try again later!'),
+      new AppError("There was an error sending the email. Try again later!"),
       500
     );
   }
 
-  pool.query('INSERT INTO contacts SET ?', req.body, function (error, results, fields) {
-    pool.release();
-
-    if (error) {
-      res.status(400).json({ message: error });
-    } else {
+  const response = await sql.contactSaveMessage(req.body);
+  
+  if (response === "success") {
+    try {
       res.status(200).json({ message: "Contact message sucessfully saved!" });
+    } catch (error) { 
+      return next(
+        new AppError(error),
+        400
+      );
     }
-  });
+  } else {
+    return next(
+      new AppError("Something went wrong"),
+      500
+    );
+  }
 });
 
 // verify reCAPTCHA response
