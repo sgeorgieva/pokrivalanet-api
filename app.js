@@ -23,7 +23,6 @@ dotenv.config({ path: "./config.env" });
 
 // Set default result order for DNS resolution
 dns.setDefaultResultOrder('ipv4first');
-// require("http").get("http://127.0.0.1:8080/", res => console.log('res.statusCode', res));
 
 const app = express();
 
@@ -49,16 +48,29 @@ if (process.env.NODE_ENV === 'development') {
 
 // Limit requests from same API
 const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
   max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: 'Too many requests from this IP, please try again in an hour!'
+  headers: true,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipFailedRequests: false,
+  skipSuccessfulRequests: false,
+  keyGenerator: function (req) {
+    return req.ip;
+  },
+  handler: function (req, res, next) {
+    return next(new AppError('Too many requests, please try again later.'), 429);
+  }
 });
 
 app.use('/', limiter);
 
 //Set Cors
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' ? process.env.REACT_APP_PRODUCTION_URL : process.env.REACT_APP_DEVELOPMENT_URL,
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.REACT_APP_PRODUCTION_URL
+      : process.env.REACT_APP_DEVELOPMENT_URL,
   credentials: true,
   optionSuccessStatus: 201,
 };
@@ -85,15 +97,15 @@ if (process.env.NODE_ENV === 'production') {
 // Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  // console.log(req.headers);
+  // console.log('req.headers', req.headers);
   next();
 });
 
 // GLOBAL ROTUES
 app.use('/api/auth', authRouter);
 app.use('/api/users', verifyToken, userRouter);
+app.use('/api/price', verifyToken, priceRouter);
 app.use('/api/trucks', truckRouter);
-app.use('/api/price', priceRouter);
 app.use('/api/windproofcurtains', windproofCurtainsRouter);
 app.use('/api', contactRouter);
 
