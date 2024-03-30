@@ -7,7 +7,10 @@ const endpoints = require('../utils/endpoints');
 const router = express.Router();
 
 const corsOptions = {
-  origin: '*',
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.REACT_APP_PRODUCTION_URL
+      : process.env.REACT_APP_DEVELOPMENT_URL,
   credentials: true,
   optionSuccessStatus: 201,
 };
