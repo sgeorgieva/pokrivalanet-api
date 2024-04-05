@@ -1,8 +1,8 @@
-const cors = require('cors');
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const authController = require('../controllers/authController');
-const endpoints = require('../utils/endpoints');
+const cors = require("cors");
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const authController = require("../controllers/authController");
+const endpoints = require("../utils/endpoints");
 
 const router = express.Router();
 
@@ -22,6 +22,7 @@ router.use(cors(corsOptions));
 
 router.post(`${endpoints.register}`, authController.register);
 router.post(`${endpoints.login}`, authController.login);
+router.get(`${endpoints.refresh}`, authController.refresh);
 router.get(`${endpoints.logout}`, authController.logout);
 
 module.exports = router;

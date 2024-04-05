@@ -110,7 +110,9 @@ sql.allTruckWithShutterPrices = async () => {
 };
 sql.allTruckWithoutShutterPrices = async () => {
   try {
-    var results = await pool.query("SELECT * FROM truck_without_shutters_price");
+    var results = await pool.query(
+      "SELECT * FROM truck_without_shutters_price"
+    );
     return results[0];
   } catch (err) {
     throw err;
@@ -186,7 +188,7 @@ sql.editTruckGondolaPrices = async (data) => {
   }
 };
 
-sql.editTruckWithShutterPrices = async (data) => { 
+sql.editTruckWithShutterPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE truck_with_shutters_price 
@@ -201,14 +203,16 @@ sql.editTruckWithShutterPrices = async (data) => {
     );
 
     if (results[0].affectedRows >= 1) {
-      const results = await pool.query(`SELECT * FROM truck_with_shutters_price`);
+      const results = await pool.query(
+        `SELECT * FROM truck_with_shutters_price`
+      );
       return results[0];
     }
-  } catch(err) {
+  } catch (err) {
     throw err;
   }
 };
-sql.editTruckWithoutShutterPrices = async (data) => { 
+sql.editTruckWithoutShutterPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE truck_without_shutters_price 
@@ -223,10 +227,12 @@ sql.editTruckWithoutShutterPrices = async (data) => {
     );
 
     if (results[0].affectedRows >= 1) {
-      const results = await pool.query(`SELECT * FROM truck_without_shutters_price`);
+      const results = await pool.query(
+        `SELECT * FROM truck_without_shutters_price`
+      );
       return results[0];
     }
-  } catch(err) {
+  } catch (err) {
     throw err;
   }
 };
@@ -258,7 +264,7 @@ sql.editWindproofCurtainsPrices = async (data) => {
         data.price_zip,
         data.price_knobs,
         data.price_curtain,
-        data.id
+        data.id,
       ],
       function (error, results, fields) {
         if (error) {
@@ -268,7 +274,9 @@ sql.editWindproofCurtainsPrices = async (data) => {
     );
 
     if (results[0].affectedRows >= 1) {
-      const results = await pool.query(`SELECT * FROM windproof_curtains_prices`);
+      const results = await pool.query(
+        `SELECT * FROM windproof_curtains_prices`
+      );
       return results[0];
     }
   } catch (err) {
@@ -279,7 +287,8 @@ sql.editWindproofCurtainsPrices = async (data) => {
 sql.windproofCurtainsOfferSaveFile = async (data) => {
   try {
     const results = await pool.query(
-      `INSERT INTO windproof_curtains SET ?`, [data],
+      `INSERT INTO windproof_curtains SET ?`,
+      [data],
       function (error, results, fields) {
         if (error) {
           throw err;
@@ -295,7 +304,7 @@ sql.windproofCurtainsOfferSaveFile = async (data) => {
 sql.windproofCurtainsOfferEditFile = async (data) => {
   try {
     const results = await pool.query(
-      `UPDATE windproof_curtains SET filename = ?, type = ?, size = ? WHERE id=?`, 
+      `UPDATE windproof_curtains SET filename = ?, type = ?, size = ? WHERE id=?`,
       [data.filename, data.type, data.size, data.id],
       function (error, results, fields) {
         if (error) {
@@ -315,7 +324,8 @@ sql.windproofCurtainsOfferEditFile = async (data) => {
 sql.truckOfferSaveFile = async (data) => {
   try {
     const results = await pool.query(
-      `INSERT INTO truck_covers SET ?`, [data],
+      `INSERT INTO truck_covers SET ?`,
+      [data],
       function (error, results, fields) {
         if (error) {
           throw err;
@@ -332,7 +342,7 @@ sql.truckOfferSaveFile = async (data) => {
 sql.truckOfferEditFile = async (data) => {
   try {
     const results = await pool.query(
-      `UPDATE truck_covers SET filename = ?, type = ?, size = ? WHERE id=?`, 
+      `UPDATE truck_covers SET filename = ?, type = ?, size = ? WHERE id=?`,
       [data.filename, data.type, data.size, data.id],
       function (error, results, fields) {
         if (error) {
@@ -341,7 +351,7 @@ sql.truckOfferEditFile = async (data) => {
       }
     );
 
-    if (results[0].affectedRows >= 1) { 
+    if (results[0].affectedRows >= 1) {
       return results;
     }
   } catch (err) {
@@ -352,7 +362,8 @@ sql.truckOfferEditFile = async (data) => {
 sql.contactSaveMessage = async (data) => {
   try {
     const results = await pool.query(
-      `INSERT INTO contacts SET ?`, [data],
+      `INSERT INTO contacts SET ?`,
+      [data],
       function (error, results, fields) {
         if (error) {
           throw err;
@@ -360,12 +371,12 @@ sql.contactSaveMessage = async (data) => {
       }
     );
 
-    if (results[0].affectedRows >= 1) { 
-      return 'success';
+    if (results[0].affectedRows >= 1) {
+      return "success";
     }
   } catch (err) {
     throw err;
   }
 };
 
-module.exports = sql;
+module.exports = { sql, pool };

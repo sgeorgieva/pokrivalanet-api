@@ -1,7 +1,7 @@
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const iterateEntries = require("../utils/iterateEntries");
-const sql = require("../utils/sql");
+const { sql } = require("../utils/sql");
 
 exports.windproofCurtainPrices = catchAsync(async (req, res, next) => {
   try {
@@ -44,7 +44,7 @@ exports.windproofCurtainsEditPrice = catchAsync(async (req, res, next) => {
       success: true,
       status: "success",
       message: "Windproof curtains prices edited sucessfully!",
-      result: results
+      result: results,
     });
   } catch (error) {
     return next(new AppError(error), 500);

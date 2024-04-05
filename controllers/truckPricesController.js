@@ -1,6 +1,6 @@
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const sql = require("../utils/sql");
+const { sql } = require("../utils/sql");
 const iterateEntries = require("../utils/iterateEntries");
 
 exports.truckCoversPrice = catchAsync(async (req, res, next) => {
@@ -101,7 +101,7 @@ exports.truckCoversEditPrice = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.truckGondolaEditPrice = catchAsync(async (req, res, next) => { 
+exports.truckGondolaEditPrice = catchAsync(async (req, res, next) => {
   try {
     const newData = req.body;
 
@@ -130,14 +130,11 @@ exports.truckGondolaEditPrice = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.truckWithShutterEditPrice = catchAsync(async (req, res, next) => { 
+exports.truckWithShutterEditPrice = catchAsync(async (req, res, next) => {
   try {
     const newData = req.body;
-    
-    if (
-      !newData.id ||
-      !newData.with_shutter_price
-    ) {
+
+    if (!newData.id || !newData.with_shutter_price) {
       return next(new AppError("Missing required parameters"), 400);
     }
 
@@ -159,10 +156,7 @@ exports.truckWithoutShutterEditPrice = catchAsync(async (req, res, next) => {
   try {
     const newData = req.body;
 
-    if (
-      !newData.id ||
-      !newData.without_shutters_price
-    ) {
+    if (!newData.id || !newData.without_shutters_price) {
       return next(new AppError("Missing required parameters"), 400);
     }
 

@@ -1,11 +1,11 @@
-const jsonwebtoken = require('jsonwebtoken');
-const signature = require('cookie-signature')
-const cookie = require('cookie');
-const zlib = require('zlib');
+const zlib = require("zlib");
 const { hashSync, genSaltSync, compareSync } = require("bcrypt");
-const catchAsync = require('./../utils/catchAsync');
-const AppError = require('../utils/appError');
-const pool2 = require('../utils/pool2');
+const jwt = require("jsonwebtoken");
+const catchAsync = require("./../utils/catchAsync");
+const AppError = require("../utils/appError");
+const { sql } = require("../utils/sql.js");
+// const signature = require("cookie-signature");
+// const cookie = require("cookie");
 
 exports.register = catchAsync(async (req, res, next) => {
   try {
@@ -13,24 +13,25 @@ exports.register = catchAsync(async (req, res, next) => {
     let password = req.body.password;
 
     if (!userName || !password) {
-      return next(new AppError('Invalid username or password'), 400);
+      return next(new AppError("Invalid username or password"), 400);
     }
 
     const salt = genSaltSync(10);
     password = hashSync(password, salt);
 
-    const user =  await pool2.insertUser(userName, password);
-     
-    const jsontoken = jsonwebtoken.sign({user: user}, process.env.SECRET_KEY, { expiresIn: '30m'} );
-    // res.cookie('token', jsontoken, { httpOnly: true, secure: false, SameSite: 'strict' , expires: new Date(Number(new Date()) + 30*60*1000) }); //we add secure: true, when using https.
+    const user = await sql.insertUser(userName, password);
+
+    const jsontoken = jwt.sign({ user: user }, process.env.SECRET_KEY, {
+      expiresIn: "15m",
+    });
 
     res.status(201).json({
       success: true,
       statusText: "User successfuly registered",
       token: jsontoken,
-      isAuthenticated: false
+      isAuthenticated: false,
     });
-  } catch(error) {
+  } catch (error) {
     return next(new AppError(error), 400);
   }
 
@@ -41,89 +42,112 @@ exports.login = catchAsync(async (req, res, next) => {
   try {
     const userName = req.body.username;
     const password = req.body.password;
-    user = await pool2.getUserByUsername(userName);
+    user = await sql.getUserByUsername(userName);
 
-    if (!user) {
-      return next(new AppError('Invalid username or password'), 401);
+    if (!userName || !password || !user) {
+      return next(new AppError("invalid_credentials_message", 401));
     }
 
     const isValidPassword = compareSync(password, user[0][0].password);
 
     if (isValidPassword) {
       user.password = undefined;
-      const token = 'your-jwt-token';
-      const cookieOptions = {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        SameSite: 'strict', 
-        expires: new Date(Number(new Date()) + 15 * 60 * 1000)
-      };
+      //creating a access token
+      const accessToken = jwt.sign(
+        { username: user[0][0].username, password: user[0][0].password },
+        process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1m" }
+      );
 
-      let signed = 's:' + signature.sign(token, process.env.SECRET_KEY);
-      let cookieString = cookie.serialize('jwtToken', signed, cookieOptions);
+      // let signed = "s:" + signature.sign(token, process.env.ACCESS_TOKEN_SECRET);
+      // let accessToken = cookie.serialize("jwtToken", signed, cookieOptions);
+
+      // Creating refresh token not that expiry of refresh
+      // token is greater than the access token
+      let refreshToken = jwt.sign(
+        { username: user[0][0].username },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: "15m" }
+      );
 
       // Calling gzip method
-      zlib.gzip(cookieString, async(err, buffer) => {
+      zlib.gzip(refreshToken, async (err, buffer) => {
         if (!err) {
-          cookieString = await buffer.toString('base64');
-          res.setHeader('Set-Cookie', cookieString);
-          res.cookie('access_token', cookieString)
+          refreshToken = await buffer.toString("base64");
+          res
             .status(200)
-              .json({
-                status: 'success',
-                statusText: "User login successfully",
-                username: user[0][0].username,
-                isAdmin: user[0][0].role_id === 1,
-                isAuthenticated: true,
-                expirationTime: cookieOptions.expires,
-                token: cookieString
-              });
+            .cookie("jwt", refreshToken, {
+              secure: true,
+              httpOnly: true,
+              SameSite: "Strict",
+              Path: "/",
+              expires: new Date(Number(new Date()) + 60 * 195 * 1000),
+              "Max-Age": 99999999
+            })
+            .json({
+              status: "success",
+              statusText: "login_message",
+              username: user[0][0].username,
+              expirationTime: new Date(Number(new Date()) + 60 * 195 * 1000),
+              isAdmin: user[0][0].role_id === 1,
+              isAuthenticated: true,
+              accessToken,
+            });
         } else {
-          // console.log('err', err);
-          return next(new AppError(err), 400);
+          return next(new AppError("invalid_credentials_message", 400));
         }
-      })} else {
-        return next(new AppError("Invalid username or password"), 401);        
-      }
-    } catch(error) {
-      console.log('error: ' + error);
-      return next(new AppError(error), 400);
+      });
+    } else {
+      return next(new AppError("invalid_credentials_message", 401));
     }
+  } catch (error) {
+    return next(new AppError("global_error_server_message", 500));
+  }
 });
 
-//  Verify Token
-exports.verifyToken = catchAsync(async(req, res, next) => {
-  // console.log('req', req);
-  const token = req.cookies.access_token;
-  // console.log('token', token);
-  
-  if (!token) {
-    return next(new AppError('Access Denied! Unauthorized User'), 403);
-  }
-  
-  try {
-    const data = jwt.verify(token, process.env.SECRET_KEY, (err, authData) => {
-      if (err) {
-        return next(new AppError('Invalid Token...'), 403);
-      } else {
-        // console.log('authData.user.role', authData.user.role);
-        const role = authData.user.role;
-
-        if (role === "admin") {
-          next();
-        } else {
-          return next(new AppError('Access Denied! You are not an Admin'), 401);
+// Refresh token
+exports.refresh = catchAsync(async (req, res, next) => {
+  if (req?.cookies?.jwt) {
+    let jwtCookie = Buffer.from(req.cookies.jwt, 'base64');
+    zlib.unzip(jwtCookie, (err, buffer) => {
+      if (!err) {
+        jwtCookie = buffer.toString("utf-8");
+   
+        // Verifying refresh token
+        if (jwtCookie) {
+          jwt.verify(
+            jwtCookie,
+            process.env.REFRESH_TOKEN_SECRET,
+            (err, decoded) => {
+              if (err) {
+                // Wrong Refesh Token
+                return next(new AppError("unauthorized_access_error_message", 401));
+              } else {
+                // Correct token we send a new access token
+                const accessToken = jwt.sign(
+                  {username: user[0][0].username, password: user[0][0].password},
+                  process.env.ACCESS_TOKEN_SECRET, { expiresIn: "10m"}
+                );
+                return res.json({ accessToken });
+              }
+            }
+          );
         }
       }
-    })
-  } catch (err) {
-    return next(new AppError('err'), 403);
+    });
+  } else {
+    return next(new AppError("unauthorized_access_error_message", 401));
   }
 });
 
-exports.logout = catchAsync(async (req, res, next) => { 
+exports.logout = catchAsync(async (req, res, next) => {
   return res
-    .clearCookie("access_token")
+    .clearCookie('jwt', '', {
+      domain: process.env.NODE_ENV === 'production' ? process.env.REACT_APP_PRODUCTION_URL : "localhost",
+      maxAge: null,
+      overwrite: true,
+      path: '/'
+    })
     .status(200)
-    .json({ statusText: "Successfully logged out!" });
+    .json({ statusText: "logout_message" })
+    .end();
 });
