@@ -1,7 +1,7 @@
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const iterateEntries = require("../utils/iterateEntries");
-const { sql } = require("../utils/sql");
+const sql = require("../utils/sql");
 
 exports.windproofCurtainPrices = catchAsync(async (req, res, next) => {
   try {

@@ -3,7 +3,7 @@ const { hashSync, genSaltSync, compareSync } = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("../utils/appError");
-const { sql } = require("../utils/sql.js");
+const sql = require("../utils/sql.js");
 // const signature = require("cookie-signature");
 // const cookie = require("cookie");
 

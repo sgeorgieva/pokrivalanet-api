@@ -379,4 +379,4 @@ sql.contactSaveMessage = async (data) => {
   }
 };
 
-module.exports = { sql, pool };
+module.exports = sql;

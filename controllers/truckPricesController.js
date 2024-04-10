@@ -1,6 +1,6 @@
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const { sql } = require("../utils/sql");
+const sql = require("../utils/sql");
 const iterateEntries = require("../utils/iterateEntries");
 
 exports.truckCoversPrice = catchAsync(async (req, res, next) => {
