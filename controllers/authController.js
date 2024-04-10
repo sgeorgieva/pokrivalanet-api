@@ -3,7 +3,7 @@ const { hashSync, genSaltSync, compareSync } = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("../utils/appError");
-const sql = require("../utils/sql.js");
+const queries = require("../utils/queries.js");
 // const signature = require("cookie-signature");
 // const cookie = require("cookie");
 
@@ -19,7 +19,7 @@ exports.register = catchAsync(async (req, res, next) => {
     const salt = genSaltSync(10);
     password = hashSync(password, salt);
 
-    const user = await sql.insertUser(userName, password);
+    const user = await queries.insertUser(userName, password);
 
     const jsontoken = jwt.sign({ user: user }, process.env.SECRET_KEY, {
       expiresIn: "15m",
@@ -42,7 +42,7 @@ exports.login = catchAsync(async (req, res, next) => {
   try {
     const userName = req.body.username;
     const password = req.body.password;
-    user = await sql.getUserByUsername(userName);
+    user = await queries.getUserByUsername(userName);
 
     if (!userName || !password || !user) {
       return next(new AppError("invalid_credentials_message", 401));
@@ -55,7 +55,8 @@ exports.login = catchAsync(async (req, res, next) => {
       //creating a access token
       const accessToken = jwt.sign(
         { username: user[0][0].username, password: user[0][0].password },
-        process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1m" }
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "1m" }
       );
 
       // let signed = "s:" + signature.sign(token, process.env.ACCESS_TOKEN_SECRET);
@@ -81,7 +82,7 @@ exports.login = catchAsync(async (req, res, next) => {
               SameSite: "Strict",
               Path: "/",
               expires: new Date(Number(new Date()) + 60 * 195 * 1000),
-              "Max-Age": 99999999
+              "Max-Age": 99999999,
             })
             .json({
               status: "success",
@@ -107,11 +108,11 @@ exports.login = catchAsync(async (req, res, next) => {
 // Refresh token
 exports.refresh = catchAsync(async (req, res, next) => {
   if (req?.cookies?.jwt) {
-    let jwtCookie = Buffer.from(req.cookies.jwt, 'base64');
+    let jwtCookie = Buffer.from(req.cookies.jwt, "base64");
     zlib.unzip(jwtCookie, (err, buffer) => {
       if (!err) {
         jwtCookie = buffer.toString("utf-8");
-   
+
         // Verifying refresh token
         if (jwtCookie) {
           jwt.verify(
@@ -120,12 +121,18 @@ exports.refresh = catchAsync(async (req, res, next) => {
             (err, decoded) => {
               if (err) {
                 // Wrong Refesh Token
-                return next(new AppError("unauthorized_access_error_message", 401));
+                return next(
+                  new AppError("unauthorized_access_error_message", 401)
+                );
               } else {
                 // Correct token we send a new access token
                 const accessToken = jwt.sign(
-                  {username: user[0][0].username, password: user[0][0].password},
-                  process.env.ACCESS_TOKEN_SECRET, { expiresIn: "10m"}
+                  {
+                    username: user[0][0].username,
+                    password: user[0][0].password,
+                  },
+                  process.env.ACCESS_TOKEN_SECRET,
+                  { expiresIn: "10m" }
                 );
                 return res.json({ accessToken });
               }
@@ -141,11 +148,14 @@ exports.refresh = catchAsync(async (req, res, next) => {
 
 exports.logout = catchAsync(async (req, res, next) => {
   return res
-    .clearCookie('jwt', '', {
-      domain: process.env.NODE_ENV === 'production' ? process.env.REACT_APP_PRODUCTION_URL : "localhost",
+    .clearCookie("jwt", "", {
+      domain:
+        process.env.NODE_ENV === "production"
+          ? process.env.REACT_APP_PRODUCTION_URL
+          : "localhost",
       maxAge: null,
       overwrite: true,
-      path: '/'
+      path: "/",
     })
     .status(200)
     .json({ statusText: "logout_message" })

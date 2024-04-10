@@ -1,7 +1,7 @@
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const sendEmail = require("../utils/emailOffer");
-const sql = require("../utils/sql");
+const queries = require("../utils/queries");
 
 exports.truckGondnolaPriceOffer = catchAsync(async (req, res, next) => {
   try {
@@ -25,12 +25,12 @@ exports.truckGondnolaPriceOffer = catchAsync(async (req, res, next) => {
       longitudinal_pocket,
       fitting_left,
       fitting_right,
-      assembly
+      assembly,
     } = req?.body?.values;
 
-    const prices = await sql.allTruckGondolaPrices();
+    const prices = await queries.allTruckGondolaPrices();
 
-    if (Object.keys(prices).length > 0) { 
+    if (Object.keys(prices).length > 0) {
       const {
         longitudinal_pocket_price,
         fitting_price,
@@ -38,7 +38,8 @@ exports.truckGondnolaPriceOffer = catchAsync(async (req, res, next) => {
         tarpaulin_price_1,
         tarpaulin_price_2,
       } = prices[0];
-      const priceTarpaulin = tarpaulin_type === "680гр/кв.м" ? tarpaulin_price_1 : tarpaulin_price_2;
+      const priceTarpaulin =
+        tarpaulin_type === "680гр/кв.м" ? tarpaulin_price_1 : tarpaulin_price_2;
       let l = Number(length) + 0.6;
       let w = Number(width) + 0.8;
       const hood_value = Number(hood);
@@ -62,32 +63,32 @@ exports.truckGondnolaPriceOffer = catchAsync(async (req, res, next) => {
         falling_right_value +
         number_stretches_value
       ).toFixed(2);
-  
+
       if (longitudinal_pocket) {
         totalLength = (
           Number(totalLength) + Number(longitudinal_pocket_price)
         ).toFixed(2);
       }
-  
+
       finalPrice = (
         Number(totalWidth) *
         Number(totalLength) *
         Number(priceTarpaulin)
       ).toFixed(2);
-  
+
       if (fitting_right || fitting_left) {
         finalPrice = (Number(finalPrice) + Number(fitting_price)).toFixed(2);
       }
-  
+
       if (assembly) {
         finalPrice = (Number(finalPrice) * Number(assembly_price)).toFixed(2);
       }
-  
+
       res.status(200).json({
         status: "success",
-        result: finalPrice
+        result: finalPrice,
       });
-    } 
+    }
   } catch (error) {
     return next(new AppError(error), 400);
   }
@@ -110,17 +111,17 @@ exports.truckShutterPriceOffer = catchAsync(async (req, res, next) => {
     var finalPrice;
     let price;
 
-    if (title === "card_text8") { 
-      price = await sql.allTruckWithoutShutterPrices();
+    if (title === "card_text8") {
+      price = await queries.allTruckWithoutShutterPrices();
       finalPrice = (totalLength + price[0].without_shutters_price).toFixed(2);
     } else {
-      price = await sql.allTruckWithShutterPrices();
+      price = await queries.allTruckWithShutterPrices();
       finalPrice = (totalLength + price[0].with_shutter_price).toFixed(2);
     }
-    
+
     res.status(200).json({
       status: "success",
-      result: finalPrice
+      result: finalPrice,
     });
   } catch (error) {
     return next(new AppError(error), 400);
@@ -133,13 +134,13 @@ exports.truckOfferFile = catchAsync(async (req, res, next) => {
       next(new AppError("Empty object provided"), 400);
     }
 
-    const response = await sql.truckOfferSaveFile(req.body);
+    const response = await queries.truckOfferSaveFile(req.body);
 
     return res.status(200).json({
       success: true,
       status: "success",
       message: "File information saved sucessfully!",
-      offerId: response
+      offerId: response,
     });
   } catch (error) {
     console.error("error", error);
@@ -155,12 +156,12 @@ exports.truckOfferComparedFiles = catchAsync(async (req, res, next) => {
       return next(new AppError("Missing required parameters"), 400);
     }
 
-    await sql.truckOfferEditFile(req.body);
+    await queries.truckOfferEditFile(req.body);
 
     return res.status(200).json({
       success: true,
       status: "success",
-      message: "File information edited sucessfully!"
+      message: "File information edited sucessfully!",
     });
   } catch (error) {
     return next(new AppError(error), 500);
@@ -181,9 +182,9 @@ exports.truckOfferEmail = catchAsync(async (req, res, next) => {
       attachments: [
         {
           filename: req.body.filename,
-          path: req.body.file
-        }
-      ]
+          path: req.body.file,
+        },
+      ],
     });
 
     res.status(200).json({

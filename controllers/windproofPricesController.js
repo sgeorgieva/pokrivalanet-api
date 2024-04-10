@@ -1,11 +1,11 @@
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const iterateEntries = require("../utils/iterateEntries");
-const sql = require("../utils/sql");
+const queries = require("../utils/queries");
 
 exports.windproofCurtainPrices = catchAsync(async (req, res, next) => {
   try {
-    const prices = await sql.allWindProofCurtainsPrices();
+    const prices = await queries.allWindProofCurtainsPrices();
     const modifiedPrices = iterateEntries(prices[0], (price) => {
       return price.toLocaleString("en-US", { minimumFractionDigits: 2 });
     });
@@ -37,8 +37,8 @@ exports.windproofCurtainsEditPrice = catchAsync(async (req, res, next) => {
       return next(new AppError("Missing required parameters"), 400);
     }
 
-    await sql.editWindproofCurtainsPrices(newData);
-    const results = await sql.allWindProofCurtainsPrices();
+    await queries.editWindproofCurtainsPrices(newData);
+    const results = await queries.allWindProofCurtainsPrices();
 
     return res.status(200).json({
       success: true,

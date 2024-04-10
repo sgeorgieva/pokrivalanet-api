@@ -1,15 +1,15 @@
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-const sql = require('../utils/sql');
-const sendEmail = require('../utils/emailOffer');
+const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
+const queries = require("../utils/queries");
+const sendEmail = require("../utils/emailOffer");
 
 exports.windproofCurtainsPriceOffer = catchAsync(async (req, res, next) => {
   try {
-    if (Object.keys(req.body).length === 0 || Object.keys(req.body.values).length === 0) {
-      return next(
-        new AppError("Empty object provided"),
-        400
-      );
+    if (
+      Object.keys(req.body).length === 0 ||
+      Object.keys(req.body.values).length === 0
+    ) {
+      return next(new AppError("Empty object provided"), 400);
     }
     const {
       width,
@@ -21,10 +21,10 @@ exports.windproofCurtainsPriceOffer = catchAsync(async (req, res, next) => {
       lower_apron,
       pipe_pocket,
       knobs,
-      curtain_have_door
+      curtain_have_door,
     } = req?.body?.values;
 
-    const prices = await sql.allWindProofCurtainsPrices();
+    const prices = await queries.allWindProofCurtainsPrices();
 
     if (Object.keys(prices).length > 0) {
       const {
@@ -36,7 +36,7 @@ exports.windproofCurtainsPriceOffer = catchAsync(async (req, res, next) => {
         price_pockets,
         price_zip,
         price_knobs,
-        price_curtain
+        price_curtain,
       } = prices[0];
       const w = Number(width);
       const h = Number(height);
@@ -45,25 +45,25 @@ exports.windproofCurtainsPriceOffer = catchAsync(async (req, res, next) => {
       let hardwareTextPrice = 0;
       let finalPrice = 0;
 
-      finalPrice = ((w + e) * (h + e));
+      finalPrice = (w + e) * (h + e);
       finalPrice = (finalPrice.toFixed(2) * priceThick).toFixed(2);
 
-      if (hardwareText === 'plastic_knobs') {
+      if (hardwareText === "plastic_knobs") {
         hardwareTextPrice = (((2 * h) / 0.35) * price_plastic_knobs).toFixed(2);
         finalPrice = Number(finalPrice) + Number(hardwareTextPrice);
       }
 
-      if (hardwareText === 'metal_knobs') {
+      if (hardwareText === "metal_knobs") {
         hardwareTextPrice = (((2 * h) / 0.35) * price_metal_knobs).toFixed(2);
         finalPrice = Number(finalPrice) + Number(hardwareTextPrice);
       }
 
-      if (hardwareText === 'strap_plates') {
-        hardwareTextPrice = ((2 * h) * price_strap_plates).toFixed(2);
+      if (hardwareText === "strap_plates") {
+        hardwareTextPrice = (2 * h * price_strap_plates).toFixed(2);
         finalPrice = Number(finalPrice) + Number(hardwareTextPrice);
       }
 
-      if (hardwareText === 'pockets') {
+      if (hardwareText === "pockets") {
         hardwareTextPrice = (((2 * h) / 0.15) * price_pockets).toFixed(2);
         finalPrice = Number(finalPrice) + Number(hardwareTextPrice);
       }
@@ -74,12 +74,12 @@ exports.windproofCurtainsPriceOffer = catchAsync(async (req, res, next) => {
       }
 
       if (lower_apron === true) {
-        hardwareTextPrice = ((w * 0.35) * price_strap_plates).toFixed(2);
+        hardwareTextPrice = (w * 0.35 * price_strap_plates).toFixed(2);
         finalPrice = Number(finalPrice) + Number(hardwareTextPrice);
       }
 
       if (pipe_pocket === true) {
-        hardwareTextPrice = ((w * 0.20) * price_strap_plates).toFixed(2);
+        hardwareTextPrice = (w * 0.2 * price_strap_plates).toFixed(2);
         finalPrice = Number(finalPrice) + Number(hardwareTextPrice);
       }
 
@@ -92,40 +92,31 @@ exports.windproofCurtainsPriceOffer = catchAsync(async (req, res, next) => {
       }
 
       res.status(200).json({
-        'status': 'success',
-        'result': finalPrice
+        status: "success",
+        result: finalPrice,
       });
     }
   } catch (error) {
-    return next(
-      new AppError(error),
-      500
-    );
+    return next(new AppError(error), 500);
   }
 });
 
 exports.windproofCurtainsOfferFile = catchAsync(async (req, res, next) => {
   try {
     if (Object.keys(req.body).length === 0) {
-      return next(
-        new AppError("Empty object provided"),
-        400
-      );
+      return next(new AppError("Empty object provided"), 400);
     }
 
-    const response = await sql.windproofCurtainsOfferSaveFile(req.body);
-   
+    const response = await queries.windproofCurtainsOfferSaveFile(req.body);
+
     return res.status(200).json({
       success: true,
       status: "success",
       message: "File information saved sucessfully!",
-      offerId: response
+      offerId: response,
     });
   } catch (error) {
-    return next(
-      new AppError(error),
-      500
-    );
+    return next(new AppError(error), 500);
   }
 });
 
@@ -134,57 +125,48 @@ exports.windproofCurtainsComparedFiles = catchAsync(async (req, res, next) => {
     const { id, filename, type, size } = req.body;
 
     if (!id || !filename || !type || !size) {
-      return next(
-        new AppError("Missing required parameters"),
-        400
-      );
+      return next(new AppError("Missing required parameters"), 400);
     }
 
-    await sql.windproofCurtainsOfferEditFile(req.body);
-    
+    await queries.windproofCurtainsOfferEditFile(req.body);
+
     return res.status(200).json({
       success: true,
       status: "success",
-      message: "File information edited sucessfully!"
+      message: "File information edited sucessfully!",
     });
   } catch (error) {
-    return next(
-      new AppError(error),
-      500
-    );
+    return next(new AppError(error), 500);
   }
 });
 
 exports.windproofCurtainsOfferEmail = catchAsync(async (req, res, next) => {
   if (Object.keys(req.body).length === 0) {
-    return next(
-      new AppError("Empty object provided"),
-      400
-    );
+    return next(new AppError("Empty object provided"), 400);
   }
 
   try {
     sendEmail({
-      from: 'Клиент',
-      subject: 'Оферта за ветроупорна завеса',
+      from: "Клиент",
+      subject: "Оферта за ветроупорна завеса",
       to: process.env.USER_EMAIL,
       html: `<h1>Оферта от клиент</h1>`,
       attachments: [
         {
           filename: req.body.filename,
-          path: req.body.file
-        }
-      ]
+          path: req.body.file,
+        },
+      ],
     });
 
     res.status(200).json({
-      status: 'success',
+      status: "success",
       message:
-        'Thanks for your messege!\n Soon some of our team will respond you.'
+        "Thanks for your messege!\n Soon some of our team will respond you.",
     });
   } catch (err) {
     return next(
-      new AppError('There was an error sending the email. Try again later!'),
+      new AppError("There was an error sending the email. Try again later!"),
       500
     );
   }

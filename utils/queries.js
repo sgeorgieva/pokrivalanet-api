@@ -14,9 +14,9 @@ var pool = mysql
   })
   .promise();
 
-let sql = {};
+let queries = {};
 
-sql.allUser = () => {
+queries.allUser = () => {
   return new Promise((resolve, reject) => {
     pool.query("SELECT * FROM users ", (error, users) => {
       if (error) {
@@ -28,7 +28,7 @@ sql.allUser = () => {
   });
 };
 
-sql.getUserByUsername = async (userName) => {
+queries.getUserByUsername = async (userName) => {
   return await pool.query(
     "SELECT * FROM users WHERE username = ?",
     [userName],
@@ -42,7 +42,7 @@ sql.getUserByUsername = async (userName) => {
   );
 };
 
-sql.insertUser = (userName, password) => {
+queries.insertUser = (userName, password) => {
   pool.query(
     "INSERT INTO users (username, password) VALUES (?,  ?)",
     [userName, password],
@@ -56,7 +56,7 @@ sql.insertUser = (userName, password) => {
   );
 };
 
-sql.updateUser = (userName, role, password, id) => {
+queries.updateUser = (userName, role, password, id) => {
   return new Promise((resolve, reject) => {
     pool.query(
       "UPDATE users SET username = ?, role= ?, password=? WHERE id = ?",
@@ -72,7 +72,7 @@ sql.updateUser = (userName, role, password, id) => {
   });
 };
 
-sql.deleteUser = (id) => {
+queries.deleteUser = (id) => {
   return new Promise((resolve, reject) => {
     pool.query("DELETE FROM users WHERE id = ?", [id], (error) => {
       if (error) {
@@ -84,7 +84,7 @@ sql.deleteUser = (id) => {
   });
 };
 
-sql.allTruckCoversPrices = async () => {
+queries.allTruckCoversPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM truck_covers_prices");
     return results[0];
@@ -92,7 +92,7 @@ sql.allTruckCoversPrices = async () => {
     throw err;
   }
 };
-sql.allTruckGondolaPrices = async () => {
+queries.allTruckGondolaPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM truck_gondola_prices");
     return results[0];
@@ -100,7 +100,7 @@ sql.allTruckGondolaPrices = async () => {
     throw err;
   }
 };
-sql.allTruckWithShutterPrices = async () => {
+queries.allTruckWithShutterPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM truck_with_shutters_price");
     return results[0];
@@ -108,7 +108,7 @@ sql.allTruckWithShutterPrices = async () => {
     throw err;
   }
 };
-sql.allTruckWithoutShutterPrices = async () => {
+queries.allTruckWithoutShutterPrices = async () => {
   try {
     var results = await pool.query(
       "SELECT * FROM truck_without_shutters_price"
@@ -119,7 +119,7 @@ sql.allTruckWithoutShutterPrices = async () => {
   }
 };
 
-sql.editTruckCoversPrices = async (data) => {
+queries.editTruckCoversPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE truck_covers_prices 
@@ -137,7 +137,7 @@ sql.editTruckCoversPrices = async (data) => {
         data.semi_trailer_three_way,
         data.ratchet_cover,
         data.simple_trailer_cover,
-        data.id
+        data.id,
       ],
       function (error, results, fields) {
         if (error) {
@@ -154,7 +154,7 @@ sql.editTruckCoversPrices = async (data) => {
     throw err;
   }
 };
-sql.editTruckGondolaPrices = async (data) => {
+queries.editTruckGondolaPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE truck_gondola_prices 
@@ -170,7 +170,7 @@ sql.editTruckGondolaPrices = async (data) => {
         data.assembly_price,
         data.tarpaulin_price_1,
         data.tarpaulin_price_2,
-        data.id
+        data.id,
       ],
       function (error, results, fields) {
         if (error) {
@@ -188,7 +188,7 @@ sql.editTruckGondolaPrices = async (data) => {
   }
 };
 
-sql.editTruckWithShutterPrices = async (data) => {
+queries.editTruckWithShutterPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE truck_with_shutters_price 
@@ -212,7 +212,7 @@ sql.editTruckWithShutterPrices = async (data) => {
     throw err;
   }
 };
-sql.editTruckWithoutShutterPrices = async (data) => {
+queries.editTruckWithoutShutterPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE truck_without_shutters_price 
@@ -237,7 +237,7 @@ sql.editTruckWithoutShutterPrices = async (data) => {
   }
 };
 
-sql.allWindProofCurtainsPrices = async () => {
+queries.allWindProofCurtainsPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM windproof_curtains_prices");
     return results[0];
@@ -245,7 +245,7 @@ sql.allWindProofCurtainsPrices = async () => {
     throw err;
   }
 };
-sql.editWindproofCurtainsPrices = async (data) => {
+queries.editWindproofCurtainsPrices = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE windproof_curtains_prices 
@@ -284,7 +284,7 @@ sql.editWindproofCurtainsPrices = async (data) => {
   }
 };
 
-sql.windproofCurtainsOfferSaveFile = async (data) => {
+queries.windproofCurtainsOfferSaveFile = async (data) => {
   try {
     const results = await pool.query(
       `INSERT INTO windproof_curtains SET ?`,
@@ -301,7 +301,7 @@ sql.windproofCurtainsOfferSaveFile = async (data) => {
   }
 };
 
-sql.windproofCurtainsOfferEditFile = async (data) => {
+queries.windproofCurtainsOfferEditFile = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE windproof_curtains SET filename = ?, type = ?, size = ? WHERE id=?`,
@@ -321,7 +321,7 @@ sql.windproofCurtainsOfferEditFile = async (data) => {
   }
 };
 
-sql.truckOfferSaveFile = async (data) => {
+queries.truckOfferSaveFile = async (data) => {
   try {
     const results = await pool.query(
       `INSERT INTO truck_covers SET ?`,
@@ -339,7 +339,7 @@ sql.truckOfferSaveFile = async (data) => {
   }
 };
 
-sql.truckOfferEditFile = async (data) => {
+queries.truckOfferEditFile = async (data) => {
   try {
     const results = await pool.query(
       `UPDATE truck_covers SET filename = ?, type = ?, size = ? WHERE id=?`,
@@ -359,7 +359,7 @@ sql.truckOfferEditFile = async (data) => {
   }
 };
 
-sql.contactSaveMessage = async (data) => {
+queries.contactSaveMessage = async (data) => {
   try {
     const results = await pool.query(
       `INSERT INTO contacts SET ?`,
@@ -379,4 +379,4 @@ sql.contactSaveMessage = async (data) => {
   }
 };
 
-module.exports = sql;
+module.exports = queries;

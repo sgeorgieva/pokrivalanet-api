@@ -1,20 +1,20 @@
 const { hashSync, genSaltSync } = require("bcrypt");
-const sql = require("../utils/sql");
+const queries = require("../utils/queries");
 
-exports.getUserId = catchAsync('userId', async (req, res, next, userId) => { 
+exports.getUserId = catchAsync("userId", async (req, res, next, userId) => {
   try {
-    const user = await sql.getOne("User", userId);
+    const user = await queries.getOne("User", userId);
     req.user = user;
     next();
-  } catch(error) {
+  } catch (error) {
     return next(new AppError(error), 404);
   }
 });
 
 exports.getUser = catchAsync(async (req, res, next) => {
   return res.send({
-    "code": 200,
-    "status": json({user: req.user})
+    code: 200,
+    status: json({ user: req.user }),
   });
 });
 
@@ -30,17 +30,17 @@ exports.createUser = catchAsync(async (req, res, next) => {
     const salt = genSaltSync(10);
     password = hashSync(password, salt);
 
-    const user = await sql.insertUser(userName, password);
+    const user = await queries.insertUser(userName, password);
     return res.send({
-      "code": 201,
-      "status": json({user: user})
+      code: 201,
+      status: json({ user: user }),
     });
-  } catch(error) {
+  } catch (error) {
     return next(new AppError(error), 400);
   }
 });
 
-exports.updateUser = (async (req, res, next) => {
+exports.updateUser = async (req, res, next) => {
   try {
     const userName = req.body.user.username;
     const role = req.body.user.role;
@@ -54,40 +54,40 @@ exports.updateUser = (async (req, res, next) => {
     const salt = genSaltSync(10);
     password = hashSync(password, salt);
 
-    const user =  await sql.updateUser(userName, role, password, userId);
+    const user = await queries.updateUser(userName, role, password, userId);
     return res.send({
-      "code": 200,
-      "status": "User updated successfully"
+      code: 200,
+      status: "User updated successfully",
     });
-  } catch(error) {
+  } catch (error) {
     return res.send({
-      "code": 400,
-      "status": error
+      code: 400,
+      status: error,
     });
   }
-});
+};
 
-exports.deleteUser = (async (req, res, next) => {
+exports.deleteUser = async (req, res, next) => {
   try {
-    const userId = req.params.id
-    const user = await sql.deleteUser(userId);
+    const userId = req.params.id;
+    const user = await queries.deleteUser(userId);
     return res.send({
-      "code": 204,
-      "status": "User deleted successfully"
+      code: 204,
+      status: "User deleted successfully",
     });
-  } catch(error) {
+  } catch (error) {
     return next(new AppError(error), 400);
   }
-});
+};
 
-exports.getAllUsers = (async (req, res, next) => {
+exports.getAllUsers = async (req, res, next) => {
   try {
-    const users = await sql.allUser();
+    const users = await queries.allUser();
     return res.send({
-      "code": 200,
-      "status": json({users: users})
+      code: 200,
+      status: json({ users: users }),
     });
-  } catch(error) {
+  } catch (error) {
     return next(new AppError(error), 400);
   }
-});
+};
