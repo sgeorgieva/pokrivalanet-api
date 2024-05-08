@@ -26,7 +26,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
-    "mysql2": "^3.6.3",
+    "mysql2": "^3.9.7",
     "nodemailer": "^6.9.7",
     "picocolors": "^1.0.0",
     "rate-limiter-flexible": "^5.0.0",
