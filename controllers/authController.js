@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("../utils/appError");
 const queries = require("../utils/queries.js");
+// const endpoints = require("../utils/endpoints.js");
+// const AppSuccess = require("../utils/appSuccess.js");
 // const signature = require("cookie-signature");
 // const cookie = require("cookie");
 
@@ -39,19 +41,25 @@ exports.register = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync(async (req, res, next) => {
+  console.log("LOGIN req", req.body);
   try {
     const userName = req.body.username;
     const password = req.body.password;
     user = await queries.getUserByUsername(userName);
 
     if (!userName || !password || !user) {
-      return next(new AppError("invalid_credentials_message", 401));
+      console.log("here1");
+      return next(new AppError("invalid_credentials_message", 400));
     }
 
     const isValidPassword = compareSync(password, user[0][0].password);
 
     if (isValidPassword) {
+      console.log("here2");
+      res.locals.userDetails = user[0][0];
+
       user.password = undefined;
+
       //creating a access token
       const accessToken = jwt.sign(
         { username: user[0][0].username, password: user[0][0].password },
@@ -92,15 +100,22 @@ exports.login = catchAsync(async (req, res, next) => {
               isAdmin: user[0][0].role_id === 1,
               isAuthenticated: true,
               accessToken,
+              user: {
+                isLoggedIn: true,
+              },
             });
+
+          // Continue to the next middleware or send the response
+          next();
         } else {
-          return next(new AppError("invalid_credentials_message", 400));
+          return next(new AppError("invalid_credentials_message", 401, user));
         }
       });
     } else {
-      return next(new AppError("invalid_credentials_message", 401));
+      return next(new AppError("invalid_credentials_message", 401, user));
     }
   } catch (error) {
+    // console.log('HERE', error);
     return next(new AppError("global_error_server_message", 500));
   }
 });

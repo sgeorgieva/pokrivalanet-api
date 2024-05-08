@@ -6,6 +6,8 @@ const rateLimit = require("express-rate-limit");
 const xss = require("xss-clean");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const csurf = require("csurf");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 const dns = require("dns");
 const dotenv = require("dotenv");
@@ -32,7 +34,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Set security HTTP headers
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        "script-src": ["'self'", "pokrivala.net"],
+      },
+    },
+    dnsPrefetchControl: {
+      allow: true,
+    },
+  })
+);
 
 // Data sanitization against XSS (cross-side script attack)
 app.use(xss());
@@ -73,7 +86,7 @@ const loginLimiter = rateLimit({
   skipFailedRequests: false,
   skipSuccessfulRequests: false,
   keyGenerator: function (req) {
-    // console.log("req", req);
+    console.log("req", req);
     // console.log("req.rateLimit", req.rateLimit);
     return req.ip;
   },
@@ -85,7 +98,7 @@ const loginLimiter = rateLimit({
 });
 
 app.use("/", limiter);
-app.use("/login", loginLimiter);
+// app.use("/login", loginLimiter);
 
 //Set Cors
 const corsOptions = {
@@ -93,6 +106,8 @@ const corsOptions = {
     process.env.NODE_ENV === "production"
       ? process.env.REACT_APP_PRODUCTION_URL
       : process.env.REACT_APP_DEVELOPMENT_URL,
+  methods: "GET,PUT,PATCH,POST,DELETE",
+  allowedHeaders: ["Content-Type", "Accept", "Origin", "X-Csrf-Token"],
   credentials: true,
   optionSuccessStatus: 201,
 };
@@ -100,8 +115,15 @@ const corsOptions = {
 // enable CORS using npm package
 app.use(cors(corsOptions));
 
+const csrfMiddleware = csurf({
+  cookie: true,
+});
+
 // Require body-parser (to receive post data from clients)
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cookieParser());
+app.use(csrfMiddleware);
 
 // parse application/json
 app.use(bodyParser.json());
@@ -124,7 +146,7 @@ app.use((req, res, next) => {
 });
 
 // GLOBAL ROTUES
-app.use("/api/auth", authRouter);
+app.use("/api/auth", loginLimiter, authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/price", priceRouter);
 app.use("/api/trucks", truckRouter);
@@ -132,6 +154,7 @@ app.use("/api/windproofcurtains", windproofCurtainsRouter);
 app.use("/api", contactRouter);
 
 app.all("*", (req, res, next) => {
+  res.cookie("XSRF-TOKEN", req.csrfToken());
   next(new AppError(`Can't find ${req.originalUrl} on this server!`), 404);
 });
 
