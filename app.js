@@ -6,7 +6,6 @@ const rateLimit = require("express-rate-limit");
 const xss = require("xss-clean");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const csurf = require("csurf");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const dns = require("dns");
@@ -27,11 +26,11 @@ dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 
-// This is required to handle urlencoded data
-app.use(express.urlencoded({ extended: true }));
-
 // This to handle json data coming from requests mainly post
 app.use(express.json());
+
+// This is required to handle urlencoded data
+app.use(express.urlencoded({ extended: true }));
 
 // Set security HTTP headers
 app.use(
@@ -67,9 +66,9 @@ const limiter = rateLimit({
   legacyHeaders: false,
   skipFailedRequests: false,
   skipSuccessfulRequests: false,
-  keyGenerator: function (req) {
-    return req.ip;
-  },
+  // keyGenerator: function (req) {
+  //   return req.ip;
+  // },
   handler: function (req, res, next) {
     return next(
       new AppError("Too many requests, please try again later.", 429)
@@ -86,8 +85,6 @@ const loginLimiter = rateLimit({
   skipFailedRequests: false,
   skipSuccessfulRequests: false,
   keyGenerator: function (req) {
-    console.log("req", req);
-    // console.log("req.rateLimit", req.rateLimit);
     return req.ip;
   },
   handler: function (req, res, next) {
@@ -98,32 +95,32 @@ const loginLimiter = rateLimit({
 });
 
 app.use("/", limiter);
-// app.use("/login", loginLimiter);
 
 //Set Cors
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? process.env.REACT_APP_PRODUCTION_URL
-      : process.env.REACT_APP_DEVELOPMENT_URL,
-  methods: "GET,PUT,PATCH,POST,DELETE",
-  allowedHeaders: ["Content-Type", "Accept", "Origin", "X-Csrf-Token"],
+  origin: ["http://localhost:3000", "https://pokrivala.net"],
+  methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Access-Control-Allow-Credentials",
+  ],
+  // allowedHeaders: ["Content-Type", "Accept", "Origin", "X-Csrf-Token"],
   credentials: true,
-  optionSuccessStatus: 201,
+  optionSuccessStatus: 204,
+  preflightContinue: false,
 };
 
 // enable CORS using npm package
 app.use(cors(corsOptions));
 
-const csrfMiddleware = csurf({
-  cookie: true,
-});
+// Enable preflight
+app.options("*", cors(corsOptions));
 
 // Require body-parser (to receive post data from clients)
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
-app.use(csrfMiddleware);
 
 // parse application/json
 app.use(bodyParser.json());
@@ -141,7 +138,9 @@ if (process.env.NODE_ENV === "production") {
 // Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  // console.log('req.headers', req.headers);
+  res.header({ "Cross-Origin-Resource-Policy": "cross-origin" });
+  res.header({ "Cross-Origin-Opener-Policy": "cross-origin" });
+  // console.log("req.headers", req.headers);
   next();
 });
 
@@ -154,7 +153,6 @@ app.use("/api/windproofcurtains", windproofCurtainsRouter);
 app.use("/api", contactRouter);
 
 app.all("*", (req, res, next) => {
-  res.cookie("XSRF-TOKEN", req.csrfToken());
   next(new AppError(`Can't find ${req.originalUrl} on this server!`), 404);
 });
 

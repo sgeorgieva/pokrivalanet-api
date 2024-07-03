@@ -41,21 +41,23 @@ exports.register = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync(async (req, res, next) => {
-  console.log("LOGIN req", req.body);
   try {
     const userName = req.body.username;
     const password = req.body.password;
+
+    if (!userName || !password) {
+      return next(new AppError("invalid_credentials_message", 400));
+    }
+
     user = await queries.getUserByUsername(userName);
 
-    if (!userName || !password || !user) {
-      console.log("here1");
+    if (!user) {
       return next(new AppError("invalid_credentials_message", 400));
     }
 
     const isValidPassword = compareSync(password, user[0][0].password);
 
     if (isValidPassword) {
-      console.log("here2");
       res.locals.userDetails = user[0][0];
 
       user.password = undefined;
@@ -82,16 +84,18 @@ exports.login = catchAsync(async (req, res, next) => {
       zlib.gzip(refreshToken, async (err, buffer) => {
         if (!err) {
           refreshToken = await buffer.toString("base64");
-          res
-            .status(200)
+          console.log("refreshToken", refreshToken);
+          return res
             .cookie("jwt", refreshToken, {
-              secure: true,
               httpOnly: true,
-              SameSite: "Strict",
-              Path: "/",
+              withCredentials: true,
+              secure: process.env.NODE_ENV === "production" ? true : false,
+              sameSite: process.env.NODE_ENV === "production" ? "Strict" : "none",
+              path: "/",
               expires: new Date(Number(new Date()) + 60 * 195 * 1000),
               "Max-Age": 99999999,
             })
+            .status(200)
             .json({
               status: "success",
               statusText: "login_message",
@@ -103,10 +107,8 @@ exports.login = catchAsync(async (req, res, next) => {
               user: {
                 isLoggedIn: true,
               },
-            });
-
-          // Continue to the next middleware or send the response
-          next();
+            })
+            .end();
         } else {
           return next(new AppError("invalid_credentials_message", 401, user));
         }
@@ -122,24 +124,34 @@ exports.login = catchAsync(async (req, res, next) => {
 
 // Refresh token
 exports.refresh = catchAsync(async (req, res, next) => {
+  console.log(
+    "HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+    req?.cookies
+  );
   if (req?.cookies?.jwt) {
+    console.log("here");
     let jwtCookie = Buffer.from(req.cookies.jwt, "base64");
     zlib.unzip(jwtCookie, (err, buffer) => {
+      console.log("here3");
       if (!err) {
+        console.log("here4");
         jwtCookie = buffer.toString("utf-8");
-
         // Verifying refresh token
         if (jwtCookie) {
+          console.log("here5");
           jwt.verify(
             jwtCookie,
             process.env.REFRESH_TOKEN_SECRET,
             (err, decoded) => {
+              console.log("here6 decoded", decoded);
               if (err) {
+                console.log("here7");
                 // Wrong Refesh Token
                 return next(
                   new AppError("unauthorized_access_error_message", 401)
                 );
               } else {
+                console.log("here8");
                 // Correct token we send a new access token
                 const accessToken = jwt.sign(
                   {
@@ -157,6 +169,7 @@ exports.refresh = catchAsync(async (req, res, next) => {
       }
     });
   } else {
+    console.log("here2");
     return next(new AppError("unauthorized_access_error_message", 401));
   }
 });
