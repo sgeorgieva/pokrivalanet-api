@@ -7,6 +7,10 @@ dotenv.config({ path: "./config.env" });
 // START THE SERVER
 const port = process.env.PORT || 4000;
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 const server = app
   .listen(port, "0.0.0.0", () => {
     console.log(pc.cyan(`App running on port ${port}...`));
