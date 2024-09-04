@@ -98,7 +98,13 @@ app.use("/", limiter);
 
 //Set Cors
 const corsOptions = {
-  origin: ["http://localhost:3000", "https://pokrivala.net"],
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://pokrivalanet-api.onrender.com/api/",
+    "http://localhost:8080/api/",
+  ],
+  // origin: "*",
   methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
   allowedHeaders: [
     "Content-Type",
@@ -107,7 +113,7 @@ const corsOptions = {
   ],
   // allowedHeaders: ["Content-Type", "Accept", "Origin", "X-Csrf-Token"],
   credentials: true,
-  optionSuccessStatus: 204,
+  optionSuccessStatus: 200,
   preflightContinue: false,
 };
 
