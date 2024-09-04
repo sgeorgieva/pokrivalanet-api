@@ -8,7 +8,7 @@ dotenv.config({ path: "./config.env" });
 const port = process.env.PORT || 8080;
 
 const server = app
-  .listen(port, () => {
+  .listen(port, "0.0.0.0", () => {
     console.log(pc.cyan(`App running on port ${port}...`));
   })
   .on("error", (err) => {
