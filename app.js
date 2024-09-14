@@ -112,7 +112,7 @@ const corsOptions = {
     "Authorization",
     "Access-Control-Allow-Credentials",
   ],
-  allowedHeaders: ["Content-Type", "Accept", "Origin", "X-Csrf-Token"],
+  // allowedHeaders: ["Content-Type", "Accept", "Origin", "X-Csrf-Token"],
   credentials: true,
   optionSuccessStatus: 200,
   preflightContinue: false,
@@ -145,8 +145,8 @@ if (process.env.NODE_ENV === "production") {
 // Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  res.header({ "Cross-Origin-Resource-Policy": "cross-origin" });
-  res.header({ "Cross-Origin-Opener-Policy": "cross-origin" });
+  // res.header({ "Cross-Origin-Resource-Policy": "cross-origin" });
+  // res.header({ "Cross-Origin-Opener-Policy": "cross-origin" });
   // console.log("req.headers", req.headers);
   next();
 });
