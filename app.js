@@ -111,7 +111,7 @@ const corsOptions = {
     "Authorization",
     "Access-Control-Allow-Credentials",
   ],
-  // allowedHeaders: ["Content-Type", "Accept", "Origin", "X-Csrf-Token"],
+  allowedHeaders: ["Content-Type", "Accept", "Origin", "X-Csrf-Token"],
   credentials: true,
   optionSuccessStatus: 200,
   preflightContinue: false,
