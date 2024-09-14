@@ -101,20 +101,17 @@ const corsOptions = {
   origin: [
     "http://localhost:3000",
     "http://localhost:3001",
-    "https://pokrivalanet-api.onrender.com/api/",
-    "https://pokrivalanet.onrender.com/",
+    "https://pokrivalanet.onrender.com",
+    "http://localhost:8080",
   ],
-  // origin: "*",
   methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
   allowedHeaders: [
     "Content-Type",
     "Authorization",
     "Access-Control-Allow-Credentials",
   ],
-  // allowedHeaders: ["Content-Type", "Accept", "Origin", "X-Csrf-Token"],
   credentials: true,
   optionSuccessStatus: 200,
-  preflightContinue: true,
 };
 
 // enable CORS using npm package
