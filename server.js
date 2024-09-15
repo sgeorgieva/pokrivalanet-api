@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
 });
 
 const server = app
-  .listen(port, "216.24.57.252", () => {
+  .listen(port, "0.0.0.0", () => {
     console.log(pc.cyan(`App running on port ${port}...`));
   })
   .on("error", (err) => {
