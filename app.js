@@ -57,11 +57,6 @@ app.use(compression());
 app.use(logger("dev"));
 // }
 
-app.use((err, req, res, next) => {
-  console.error(err.stack); // Log error stack
-  res.status(500).send("Something broke!");
-});
-
 // Limit requests from same API
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -147,7 +142,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Test middleware
-app.use((req, res, next) => {
+app.use((err, req, res, next) => {
   req.requestTime = new Date().toISOString();
   res.setHeader(
     "Cache-Control",
@@ -155,6 +150,8 @@ app.use((req, res, next) => {
   );
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
+  console.error(err.stack); // Log error stack
+  res.status(500).send("Something broke!");
   // res.header({ "Cross-Origin-Resource-Policy": "cross-origin" });
   // res.header({ "Cross-Origin-Opener-Policy": "cross-origin" });
   // console.log("req.headers", req.headers);
