@@ -10,12 +10,16 @@ exports.truckCoversPrice = catchAsync(async (req, res, next) => {
       return price.toLocaleString("en-US", { minimumFractionDigits: 2 });
     });
 
+    console.log("modifiedPrices", modifiedPrices);
+
     return res.status(200).json({
       success: true,
       status: "success",
       result: modifiedPrices,
     });
   } catch (error) {
+    console.log("error", error);
+
     return next(new AppError(error), 500);
   }
 });

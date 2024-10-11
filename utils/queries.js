@@ -3,6 +3,21 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: "./config.env" });
 
+const https = require("https");
+
+// Create an instance of the https.Agent with KeepAlive enabled
+const agent = new https.Agent({ keepAlive: true, keepAliveMsecs: 15000 });
+
+// Make an HTTPS request using the agent
+const options = {
+  hostname: process.env.HOSTING,
+  port: 3306, // Use port 443 for HTTPS
+  // path: "/api/price/truckcovers-prices", // Specify the path if needed
+  method: "GET",
+  agent: agent, // Assign the agent to the request options
+};
+
+// Create a MySQL pool connection
 var pool = mysql
   .createPool({
     host: process.env.HOSTING,
@@ -11,6 +26,7 @@ var pool = mysql
     database: process.env.DB,
     port: 3306,
     multipleStatements: true,
+    keepAliveInitialDelay: 5 * 60 * 60 * 1000, // seconds
   })
   .promise();
 
@@ -43,6 +59,7 @@ queries.getUserByUsername = async (userName) => {
 };
 
 queries.insertUser = (userName, password) => {
+  // console.log("userName, password", userName, password);
   pool.query(
     "INSERT INTO users (username, password) VALUES (?,  ?)",
     [userName, password],
@@ -87,6 +104,8 @@ queries.deleteUser = (id) => {
 queries.allTruckCoversPrices = async () => {
   try {
     var results = await pool.query("SELECT * FROM truck_covers_prices");
+    console.log("results", results);
+
     return results[0];
   } catch (err) {
     throw err;

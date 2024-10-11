@@ -121,7 +121,7 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
 // Require body-parser (to receive post data from clients)
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
@@ -146,6 +146,14 @@ app.use((req, res, next) => {
   // console.log("req.headers", req.headers);
   next();
 });
+
+// app.use((req, res, next) => {
+//   console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
+//   console.log("====================================");
+//   console.log("res", res.json());
+//   console.log("====================================");
+//   next();
+// });
 
 // GLOBAL ROTUES
 app.use("/api/auth", loginLimiter, authRouter);

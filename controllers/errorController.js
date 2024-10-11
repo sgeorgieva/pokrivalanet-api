@@ -23,11 +23,11 @@ const sendErrProd = (err, res) => {
   } else {
     res.status(500).json({
       // res.status(err.statusCode).json({
-      status: err.status,
-      [errName]: err.message,
+      //   status: err.status,
+      //   [errName]: err.message,
       // });
-      // status: 'error',
-      // message: 'Something went wrong!'
+      status: "error",
+      message: "Something went wrong!",
     });
   }
 };

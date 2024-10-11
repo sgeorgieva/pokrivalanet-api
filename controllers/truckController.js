@@ -143,7 +143,7 @@ exports.truckOfferFile = catchAsync(async (req, res, next) => {
       offerId: response,
     });
   } catch (error) {
-    console.error("error", error);
+    // console.error("error", error);
     return next(new AppError(error), 500);
   }
 });

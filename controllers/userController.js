@@ -1,5 +1,6 @@
 const { hashSync, genSaltSync } = require("bcrypt");
 const queries = require("../utils/queries");
+const AppError = require("../utils/appError");
 
 exports.getUserId = catchAsync("userId", async (req, res, next, userId) => {
   try {
@@ -19,9 +20,14 @@ exports.getUser = catchAsync(async (req, res, next) => {
 });
 
 exports.createUser = catchAsync(async (req, res, next) => {
+  console.log("Parsed req.body:", req.body); //
+
   try {
-    const userName = req.body.user.username;
-    let password = req.body.user.password;
+    // const userName = req.body.user.username;
+    // let password = req.body.user.password;
+
+    const userName = req.body.username;
+    let password = req.body.password;
 
     if (!userName || !password) {
       return next(new AppError("Wrong username or password"), 404);
@@ -31,10 +37,14 @@ exports.createUser = catchAsync(async (req, res, next) => {
     password = hashSync(password, salt);
 
     const user = await queries.insertUser(userName, password);
-    return res.send({
-      code: 201,
-      status: json({ user: user }),
-    });
+    console.log("====================================");
+    console.log("user", user);
+    console.log("====================================");
+    return res.status(201).json({ user: user });
+    // return res.send({
+    //   code: 201,
+    //   status: json({ user: user }),
+    // });
   } catch (error) {
     return next(new AppError(error), 400);
   }
