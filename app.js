@@ -69,6 +69,7 @@ const limiter = rateLimit({
   // keyGenerator: function (req) {
   //   return req.ip;
   // },
+  validate: { trustProxy: false },
   handler: function (req, res, next) {
     return next(
       new AppError("Too many requests, please try again later.", 429)
@@ -94,7 +95,7 @@ const loginLimiter = rateLimit({
   },
 });
 
-// app.use("/", limiter);
+app.use("/", limiter);
 
 //Set Cors
 const corsOptions = {
