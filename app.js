@@ -130,16 +130,16 @@ app.use(cookieParser());
 // parse application/json
 app.use(bodyParser.json());
 
-if (process.env.NODE_ENV === "production") {
-  // Serve any static files
-  // app.use(express.static(path.join(__dirname, "build")));
+// if (process.env.NODE_ENV === "production") {
+//   // Serve any static files
+//   // app.use(express.static(path.join(__dirname, "build")));
 
-  // Handle React routing, return all requests to React app
-  app.get("*", function (req, res) {
-    res.set("Cache-Control", "no-store");
-    res.sendFile(path.join(__dirname, "build", "index.html"));
-  });
-}
+//   // Handle React routing, return all requests to React app
+//   app.get("*", function (req, res) {
+//     res.set("Cache-Control", "no-store");
+//     res.sendFile(path.join(__dirname, "build", "index.html"));
+//   });
+// }
 
 // Test middleware
 app.use((err, req, res, next) => {
