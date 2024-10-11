@@ -136,6 +136,7 @@ if (process.env.NODE_ENV === "production") {
 
   // Handle React routing, return all requests to React app
   app.get("*", function (req, res) {
+    res.set("Cache-Control", "no-store");
     res.sendFile(path.join(__dirname, "build", "index.html"));
   });
 }
@@ -143,6 +144,12 @@ if (process.env.NODE_ENV === "production") {
 // Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   // res.header({ "Cross-Origin-Resource-Policy": "cross-origin" });
   // res.header({ "Cross-Origin-Opener-Policy": "cross-origin" });
   // console.log("req.headers", req.headers);
