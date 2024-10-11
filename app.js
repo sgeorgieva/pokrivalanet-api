@@ -144,14 +144,14 @@ if (process.env.NODE_ENV === "production") {
 // Test middleware
 app.use((err, req, res, next) => {
   req.requestTime = new Date().toISOString();
-  res.setHeader(
-    "Cache-Control",
-    "no-store, no-cache, must-revalidate, proxy-revalidate"
-  );
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
+  // res.setHeader(
+  //   "Cache-Control",
+  //   "no-store, no-cache, must-revalidate, proxy-revalidate"
+  // );
+  // res.setHeader("Pragma", "no-cache");
+  // res.setHeader("Expires", "0");
   console.error(err.stack); // Log error stack
-  res.status(500).send("Something broke!");
+  // res.status(500).send("Something broke!");
   // res.header({ "Cross-Origin-Resource-Policy": "cross-origin" });
   // res.header({ "Cross-Origin-Opener-Policy": "cross-origin" });
   // console.log("req.headers", req.headers);

@@ -38,7 +38,8 @@
   "scripts": {
     "start-server": "nodemon server.js",
     "find-circular-deps": "madge . -c",
-    "start": "node app.js",
+    "build": "npm install",
+    "start": "NODE_ENV=production node app.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
