@@ -94,7 +94,7 @@ const loginLimiter = rateLimit({
   },
 });
 
-app.use("/", limiter);
+// app.use("/", limiter);
 
 //Set Cors
 const corsOptions = {
