@@ -66,10 +66,10 @@ const limiter = rateLimit({
   legacyHeaders: false,
   skipFailedRequests: false,
   skipSuccessfulRequests: false,
-  // keyGenerator: function (req) {
-  //   return req.ip;
-  // },
-  validate: { trustProxy: false },
+  keyGenerator: function (req) {
+    return req.ip;
+  },
+  validate: { trustProxy: true },
   handler: function (req, res, next) {
     return next(
       new AppError("Too many requests, please try again later.", 429)
