@@ -53,9 +53,14 @@ app.disable("x-powered-by");
 app.use(compression());
 
 // Development logging
-if (process.env.NODE_ENV === "development") {
-  app.use(logger("dev"));
-}
+// if (process.env.NODE_ENV === "development") {
+app.use(logger("dev"));
+// }
+
+app.use((err, req, res, next) => {
+  console.error(err.stack); // Log error stack
+  res.status(500).send("Something broke!");
+});
 
 // Limit requests from same API
 const limiter = rateLimit({
