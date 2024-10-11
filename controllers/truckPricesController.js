@@ -20,7 +20,7 @@ exports.truckCoversPrice = catchAsync(async (req, res, next) => {
   } catch (error) {
     console.log("error", error);
 
-    return next(new AppError(error), 500);
+    return next(new AppError(error.message), 500);
   }
 });
 
