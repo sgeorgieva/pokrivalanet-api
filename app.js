@@ -103,7 +103,6 @@ const corsOptions = {
     "http://localhost:3000",
     "http://localhost:3001",
     "https://pokrivalanet.onrender.com",
-    "https://pokrivalanet-api.onrender.com",
     "http://localhost:8080",
   ],
   methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
